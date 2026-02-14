@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blur Reveal Input - Demo</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #0066cc;
+      --bg: #f5f7fa;
+      --card-bg: #ffffff;
+      --text: #333333;
+      --border: #e1e5eb;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin: 0 0 0.5rem;
+      background: linear-gradient(135deg, var(--primary), #0099ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tagline {
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      margin: 0 0 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .description {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      font-size: 1rem;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="password"]:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+    }
+
+    input:disabled {
+      background: #f5f5f5;
+      cursor: not-allowed;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .control-group {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .control-group label {
+      font-size: 0.875rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+
+    .value-display {
+      font-size: 0.875rem;
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .instructions {
+      background: linear-gradient(135deg, #e8f4ff, #f0f7ff);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .instructions h3 {
+      margin: 0 0 1rem;
+      font-size: 1rem;
+    }
+
+    .instructions ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .instructions li {
+      margin-bottom: 0.5rem;
+    }
+
+    .instructions li:last-child {
+      margin-bottom: 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: var(--primary);
+      color: white;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-left: 0.5rem;
+    }
+
+    /* Code Snippets Section */
+    .snippet-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 0;
+      overflow: hidden;
+    }
+
+    .snippet-tab {
+      padding: 0.625rem 1rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: #666;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      transition: color 0.2s, border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .snippet-tab:hover {
+      color: var(--text);
+    }
+
+    .snippet-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .snippet-panel {
+      display: none;
+      position: relative;
+    }
+
+    .snippet-panel.active {
+      display: block;
+    }
+
+    .snippet-code {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 0 0 8px 8px;
+      padding: 1.25rem;
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 0;
+      white-space: pre;
+      tab-size: 2;
+    }
+
+    .snippet-code .kw { color: #cba6f7; }
+    .snippet-code .str { color: #a6e3a1; }
+    .snippet-code .fn { color: #89b4fa; }
+    .snippet-code .cm { color: #6c7086; }
+    .snippet-code .tag { color: #f38ba8; }
+    .snippet-code .attr { color: #fab387; }
+    .snippet-code .num { color: #fab387; }
+    .snippet-code .punct { color: #9399b2; }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      padding: 0.375rem 0.75rem;
+      background: rgba(255, 255, 255, 0.1);
+      color: #cdd6f4;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .copy-btn.copied {
+      background: rgba(166, 227, 161, 0.2);
+      border-color: rgba(166, 227, 161, 0.4);
+      color: #a6e3a1;
+    }
+
+    .snippet-note {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 0.75rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+      font-size: 0.875rem;
+    }
+
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Blur Reveal Input</h1>
+      <p class="tagline">A beautiful blur effect for password inputs with selective reveal</p>
+    </header>
+
+    <div class="card">
+      <h2 class="card-title">Try It Out</h2>
+
+      <div class="form-group">
+        <label for="demo-password">Password Field</label>
+        <p class="description">Hover over the field to reveal characters. Move your cursor to see the spotlight effect.</p>
+        <input type="password" id="demo-password" placeholder="Type your password...">
+      </div>
+
+      <div class="controls">
+        <div class="control-group">
+          <label for="blur-intensity">
+            Blur Intensity: <span class="value-display" id="blur-value">4.0px</span>
+          </label>
+          <input type="range" id="blur-intensity" min="2" max="7" step="0.1" value="4">
+        </div>
+        <div class="control-group">
+          <label for="reveal-radius">
+            Reveal Radius: <span class="value-display" id="radius-value">30px</span>
+          </label>
+          <input type="range" id="reveal-radius" min="10" max="45" value="30">
+        </div>
+        <div class="control-group">
+          <label for="fade-delay">
+            Fade Delay: <span class="value-display" id="delay-value">500ms</span>
+          </label>
+          <input type="range" id="fade-delay" min="0" max="2000" step="100" value="500">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Copy Your Config</h2>
+      <p class="description" style="margin-bottom: 1rem;">Adjust the sliders above, then copy the snippet for your setup.</p>
+
+      <div class="snippet-tabs" role="tablist">
+        <button class="snippet-tab active" data-tab="cdn" role="tab" aria-selected="true">CDN</button>
+        <button class="snippet-tab" data-tab="esm" role="tab" aria-selected="false">ES Module</button>
+        <button class="snippet-tab" data-tab="react" role="tab" aria-selected="false">React</button>
+        <button class="snippet-tab" data-tab="vue" role="tab" aria-selected="false">Vue</button>
+        <button class="snippet-tab" data-tab="angular" role="tab" aria-selected="false">Angular</button>
+        <button class="snippet-tab" data-tab="svelte" role="tab" aria-selected="false">Svelte</button>
+      </div>
+
+      <div class="snippet-panel active" data-panel="cdn" role="tabpanel">
+        <button class="copy-btn" aria-label="Copy code">Copy</button>
+        <pre class="snippet-code" id="snippet-cdn"></pre>
+      </div>
+      <div class="snippet-panel" data-panel="esm" role="tabpanel">
+        <button class="copy-btn" aria-label="Copy code">Copy</button>
+        <pre class="snippet-code" id="snippet-esm"></pre>
+      </div>
+      <div class="snippet-panel" data-panel="react" role="tabpanel">
+        <button class="copy-btn" aria-label="Copy code">Copy</button>
+        <pre class="snippet-code" id="snippet-react"></pre>
+      </div>
+      <div class="snippet-panel" data-panel="vue" role="tabpanel">
+        <button class="copy-btn" aria-label="Copy code">Copy</button>
+        <pre class="snippet-code" id="snippet-vue"></pre>
+      </div>
+      <div class="snippet-panel" data-panel="angular" role="tabpanel">
+        <button class="copy-btn" aria-label="Copy code">Copy</button>
+        <pre class="snippet-code" id="snippet-angular"></pre>
+      </div>
+      <div class="snippet-panel" data-panel="svelte" role="tabpanel">
+        <button class="copy-btn" aria-label="Copy code">Copy</button>
+        <pre class="snippet-code" id="snippet-svelte"></pre>
+      </div>
+
+      <p class="snippet-note" id="snippet-defaults-note"></p>
+    </div>
+
+    <div class="instructions">
+      <h3>How to Use</h3>
+      <ul>
+        <li><strong>Desktop:</strong> Hover your mouse cursor over the password field to reveal characters</li>
+        <li><strong>Mobile:</strong> Touch and drag across the field to reveal</li>
+        <li><strong>Keyboard:</strong> Use Arrow keys to move, Shift+Arrow to reveal (coming soon)</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      Blur Reveal Input &mdash;
+      <a href="https://github.com/iLoveMyCat/blur-reveal-input">GitHub</a>
+    </p>
+  </footer>
+
+  <script type="module">
+    import { BlurRevealInput } from '../dist/blur-reveal-input.esm.js';
+
+    // Main demo input
+    const demoInput = document.getElementById('demo-password');
+    const demoInstance = new BlurRevealInput(demoInput);
+
+    // Controls
+    const blurSlider = document.getElementById('blur-intensity');
+    const radiusSlider = document.getElementById('reveal-radius');
+    const delaySlider = document.getElementById('fade-delay');
+    const blurValue = document.getElementById('blur-value');
+    const radiusValue = document.getElementById('radius-value');
+    const delayValue = document.getElementById('delay-value');
+
+    blurSlider.addEventListener('input', (e) => {
+      const value = parseFloat(e.target.value);
+      blurValue.textContent = `${value.toFixed(1)}px`;
+      demoInstance.updateConfig({ blurIntensity: value });
+    });
+
+    radiusSlider.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value, 10);
+      radiusValue.textContent = `${value}px`;
+      demoInstance.updateConfig({ revealRadius: value });
+    });
+
+    delaySlider.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value, 10);
+      delayValue.textContent = `${value}ms`;
+      demoInstance.updateConfig({ fadeDelay: value });
+    });
+
+    // Throttle snippet updates to avoid layout thrashing during slider drag
+    let snippetRaf = null;
+    function scheduleSnippetUpdate() {
+      if (snippetRaf) return;
+      snippetRaf = requestAnimationFrame(() => {
+        snippetRaf = null;
+        updateSnippets();
+      });
+    }
+
+    blurSlider.addEventListener('input', scheduleSnippetUpdate);
+    radiusSlider.addEventListener('input', scheduleSnippetUpdate);
+    delaySlider.addEventListener('input', scheduleSnippetUpdate);
+
+    // Defaults
+    const DEFAULTS = { blurIntensity: 4, revealRadius: 30, fadeDelay: 500 };
+
+    function getConfig() {
+      return {
+        blurIntensity: parseFloat(blurSlider.value),
+        revealRadius: parseInt(radiusSlider.value, 10),
+        fadeDelay: parseInt(delaySlider.value, 10),
+      };
+    }
+
+    function isDefault(cfg) {
+      return cfg.blurIntensity === DEFAULTS.blurIntensity &&
+             cfg.revealRadius === DEFAULTS.revealRadius &&
+             cfg.fadeDelay === DEFAULTS.fadeDelay;
+    }
+
+    function configObj(cfg) {
+      const parts = [];
+      if (cfg.blurIntensity !== DEFAULTS.blurIntensity) parts.push(`blurIntensity: ${cfg.blurIntensity % 1 === 0 ? cfg.blurIntensity : cfg.blurIntensity.toFixed(1)}`);
+      if (cfg.revealRadius !== DEFAULTS.revealRadius) parts.push(`revealRadius: ${cfg.revealRadius}`);
+      if (cfg.fadeDelay !== DEFAULTS.fadeDelay) parts.push(`fadeDelay: ${cfg.fadeDelay}`);
+      return parts.length ? `{ ${parts.join(', ')} }` : '';
+    }
+
+    function h(text) {
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Syntax highlighting helpers
+    function kw(t) { return `<span class="kw">${t}</span>`; }
+    function str(t) { return `<span class="str">${t}</span>`; }
+    function fn(t) { return `<span class="fn">${t}</span>`; }
+    function cm(t) { return `<span class="cm">${t}</span>`; }
+    function tag(t) { return `<span class="tag">${t}</span>`; }
+    function attr(t) { return `<span class="attr">${t}</span>`; }
+    function num(t) { return `<span class="num">${t}</span>`; }
+    function punct(t) { return `<span class="punct">${t}</span>`; }
+
+    function buildSnippets(cfg) {
+      const def = isDefault(cfg);
+      const opts = configObj(cfg);
+
+      // Data attributes for CDN
+      const dataAttrs = [];
+      if (cfg.blurIntensity !== DEFAULTS.blurIntensity) dataAttrs.push(`  ${attr('data-blur-intensity')}${punct('=')}${str(`"${cfg.blurIntensity % 1 === 0 ? cfg.blurIntensity : cfg.blurIntensity.toFixed(1)}"`)}`)
+      if (cfg.revealRadius !== DEFAULTS.revealRadius) dataAttrs.push(`  ${attr('data-reveal-radius')}${punct('=')}${str(`"${cfg.revealRadius}"`)}`);
+      if (cfg.fadeDelay !== DEFAULTS.fadeDelay) dataAttrs.push(`  ${attr('data-fade-delay')}${punct('=')}${str(`"${cfg.fadeDelay}"`)}`);
+      const dataAttrStr = dataAttrs.length ? '\n' + dataAttrs.join('\n') + '\n' : ' ';
+
+      // Highlighted config object for JS snippets
+      const cfgParts = [];
+      if (cfg.blurIntensity !== DEFAULTS.blurIntensity) cfgParts.push(`  blurIntensity${punct(':')} ${num(cfg.blurIntensity % 1 === 0 ? cfg.blurIntensity : cfg.blurIntensity.toFixed(1))}`);
+      if (cfg.revealRadius !== DEFAULTS.revealRadius) cfgParts.push(`  revealRadius${punct(':')} ${num(cfg.revealRadius)}`);
+      if (cfg.fadeDelay !== DEFAULTS.fadeDelay) cfgParts.push(`  fadeDelay${punct(':')} ${num(cfg.fadeDelay)}`);
+      const cfgBlock = cfgParts.length ? `${punct(',')} ${punct('{')}\n${cfgParts.join(punct(',') + '\n')}\n${punct('}')}` : '';
+
+      const snippets = {};
+
+      // CDN
+      snippets.cdn = `${punct('&lt;')}${tag('input')} ${attr('type')}${punct('=')}${str('"password"')} ${attr('placeholder')}${punct('=')}${str('"Password"')}${dataAttrStr}${punct('&gt;')}
+${punct('&lt;')}${tag('script')} ${attr('src')}${punct('=')}${str('"https://unpkg.com/blur-reveal-input"')}${punct('&gt;&lt;/')}${tag('script')}${punct('&gt;')}`;
+
+      // ESM
+      snippets.esm = `${kw('import')} ${punct('{')} ${fn('BlurRevealInput')} ${punct('}')} ${kw('from')} ${str("'blur-reveal-input'")}${punct(';')}
+
+${kw('const')} input ${punct('=')} document${punct('.')}${fn('querySelector')}${punct('(')}${str("'input[type=\"password\"]'")}${punct(')')}${punct(';')}
+${kw('const')} blur ${punct('=')} ${kw('new')} ${fn('BlurRevealInput')}${punct('(')}input${cfgBlock}${punct(')')}${punct(';')}`;
+
+      // React
+      snippets.react = `${kw('import')} ${punct('{')} useEffect${punct(',')} useRef ${punct('}')} ${kw('from')} ${str("'react'")}${punct(';')}
+${kw('import')} ${punct('{')} ${fn('BlurRevealInput')} ${punct('}')} ${kw('from')} ${str("'blur-reveal-input'")}${punct(';')}
+
+${kw('function')} ${fn('PasswordField')}${punct('()')} ${punct('{')}
+  ${kw('const')} ref ${punct('=')} ${fn('useRef')}${punct('(')}${kw('null')}${punct(')')}${punct(';')}
+
+  ${fn('useEffect')}${punct('(() => {')}
+    ${kw('const')} blur ${punct('=')} ${kw('new')} ${fn('BlurRevealInput')}${punct('(')}ref${punct('.')}current${cfgBlock}${punct(')')}${punct(';')}
+    ${kw('return')} ${punct('() =>')} blur${punct('.')}${fn('destroy')}${punct('()')}${punct(';')}
+  ${punct('},')} ${punct('[])')}${punct(';')}
+
+  ${kw('return')} ${punct('&lt;')}${tag('input')} ${attr('ref')}${punct('={')}ref${punct('}')} ${attr('type')}${punct('=')}${str('"password"')} ${attr('placeholder')}${punct('=')}${str('"Password"')} ${punct('/&gt;')}${punct(';')}
+${punct('}')}`;
+
+      // Vue
+      snippets.vue = `${punct('&lt;')}${tag('template')}${punct('&gt;')}
+  ${punct('&lt;')}${tag('input')} ${attr('ref')}${punct('=')}${str('"passwordInput"')} ${attr('type')}${punct('=')}${str('"password"')} ${attr('placeholder')}${punct('=')}${str('"Password"')} ${punct('/&gt;')}
+${punct('&lt;/')}${tag('template')}${punct('&gt;')}
+
+${punct('&lt;')}${tag('script')} ${attr('setup')}${punct('&gt;')}
+${kw('import')} ${punct('{')} ref${punct(',')} onMounted${punct(',')} onBeforeUnmount ${punct('}')} ${kw('from')} ${str("'vue'")}${punct(';')}
+${kw('import')} ${punct('{')} ${fn('BlurRevealInput')} ${punct('}')} ${kw('from')} ${str("'blur-reveal-input'")}${punct(';')}
+
+${kw('const')} passwordInput ${punct('=')} ${fn('ref')}${punct('(')}${kw('null')}${punct(')')}${punct(';')}
+${kw('let')} blur${punct(';')}
+
+${fn('onMounted')}${punct('(() => {')}
+  blur ${punct('=')} ${kw('new')} ${fn('BlurRevealInput')}${punct('(')}passwordInput${punct('.')}value${cfgBlock}${punct(')')}${punct(';')}
+${punct('})')}${punct(';')}
+
+${fn('onBeforeUnmount')}${punct('(() => {')}
+  blur${punct('?.')}${fn('destroy')}${punct('()')}${punct(';')}
+${punct('})')}${punct(';')}
+${punct('&lt;/')}${tag('script')}${punct('&gt;')}`;
+
+      // Angular
+      snippets.angular = `${kw('import')} ${punct('{')} Component${punct(',')} ElementRef${punct(',')} ViewChild${punct(',')} AfterViewInit${punct(',')} OnDestroy ${punct('}')} ${kw('from')} ${str("'@angular/core'")}${punct(';')}
+${kw('import')} ${punct('{')} ${fn('BlurRevealInput')} ${punct('}')} ${kw('from')} ${str("'blur-reveal-input'")}${punct(';')}
+
+${punct('@')}${fn('Component')}${punct('({')}
+  selector${punct(':')} ${str("'app-password'")}${punct(',')}
+  template${punct(':')} ${str('`&lt;input #passwordInput type="password" placeholder="Password" /&gt;`')}
+${punct('})')}
+${kw('export class')} ${fn('PasswordComponent')} ${kw('implements')} AfterViewInit${punct(',')} OnDestroy ${punct('{')}
+  ${punct('@')}${fn('ViewChild')}${punct('(')}${str("'passwordInput'")}${punct(')')} inputRef${punct('!:')} ElementRef${punct('&lt;')}HTMLInputElement${punct('&gt;')}${punct(';')}
+  ${kw('private')} blur${punct('?:')} ${fn('BlurRevealInput')}${punct(';')}
+
+  ${fn('ngAfterViewInit')}${punct('()')} ${punct('{')}
+    ${kw('this')}${punct('.')}blur ${punct('=')} ${kw('new')} ${fn('BlurRevealInput')}${punct('(')}${kw('this')}${punct('.')}inputRef${punct('.')}nativeElement${cfgBlock}${punct(')')}${punct(';')}
+  ${punct('}')}
+
+  ${fn('ngOnDestroy')}${punct('()')} ${punct('{')}
+    ${kw('this')}${punct('.')}blur${punct('?.')}${fn('destroy')}${punct('()')}${punct(';')}
+  ${punct('}')}
+${punct('}')}`;
+
+      // Svelte
+      snippets.svelte = `${punct('&lt;')}${tag('script')}${punct('&gt;')}
+  ${kw('import')} ${punct('{')} onMount ${punct('}')} ${kw('from')} ${str("'svelte'")}${punct(';')}
+  ${kw('import')} ${punct('{')} ${fn('BlurRevealInput')} ${punct('}')} ${kw('from')} ${str("'blur-reveal-input'")}${punct(';')}
+
+  ${kw('let')} inputEl${punct(';')}
+
+  ${fn('onMount')}${punct('(() => {')}
+    ${kw('const')} blur ${punct('=')} ${kw('new')} ${fn('BlurRevealInput')}${punct('(')}inputEl${cfgBlock}${punct(')')}${punct(';')}
+    ${kw('return')} ${punct('() =>')} blur${punct('.')}${fn('destroy')}${punct('()')}${punct(';')}
+  ${punct('})')}${punct(';')}
+${punct('&lt;/')}${tag('script')}${punct('&gt;')}
+
+${punct('&lt;')}${tag('input')} ${attr('bind')}${punct(':')}this${punct('={')}inputEl${punct('}')} ${attr('type')}${punct('=')}${str('"password"')} ${attr('placeholder')}${punct('=')}${str('"Password"')} ${punct('/&gt;')}`;
+
+      return snippets;
+    }
+
+    function updateSnippets() {
+      const cfg = getConfig();
+      const snippets = buildSnippets(cfg);
+      const note = document.getElementById('snippet-defaults-note');
+
+      document.getElementById('snippet-cdn').innerHTML = snippets.cdn;
+      document.getElementById('snippet-esm').innerHTML = snippets.esm;
+      document.getElementById('snippet-react').innerHTML = snippets.react;
+      document.getElementById('snippet-vue').innerHTML = snippets.vue;
+      document.getElementById('snippet-angular').innerHTML = snippets.angular;
+      document.getElementById('snippet-svelte').innerHTML = snippets.svelte;
+
+      if (isDefault(cfg)) {
+        note.textContent = 'Using default settings — no extra config needed.';
+      } else {
+        note.textContent = 'Custom settings detected — config is included in the snippet.';
+      }
+    }
+
+    // Tab switching
+    document.querySelectorAll('.snippet-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.snippet-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+        document.querySelectorAll('.snippet-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        document.querySelector(`[data-panel="${tab.dataset.tab}"]`).classList.add('active');
+      });
+    });
+
+    // Copy buttons
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const code = btn.parentElement.querySelector('.snippet-code');
+        const text = code.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+        });
+      });
+    });
+
+    // Initial render
+    updateSnippets();
+  </script>
+</body>
+</html>

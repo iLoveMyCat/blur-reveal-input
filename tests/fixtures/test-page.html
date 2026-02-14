@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blur Reveal Input - Test Page</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+    }
+    input:focus {
+      outline: none;
+      border-color: #0066cc;
+      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    }
+    .info {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #e8f4ff;
+      border-radius: 4px;
+      font-size: 0.875rem;
+    }
+    #event-log {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.75rem;
+    }
+    .log-entry {
+      padding: 0.25rem 0;
+      border-bottom: 1px solid #eee;
+    }
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Blur Reveal Input Test Page</h1>
+
+  <form id="test-form">
+    <div class="form-group">
+      <label for="password-input">Password (Default Config)</label>
+      <input type="password" id="password-input" name="password1" placeholder="Enter password">
+    </div>
+
+    <div class="form-group">
+      <label for="password2">Password (Custom Blur: 12px)</label>
+      <input
+        type="password"
+        id="password2"
+        name="password2"
+        placeholder="Enter password"
+        data-blur-intensity="12"
+        data-reveal-radius="40"
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="password3">Password (Opt-out)</label>
+      <input
+        type="password"
+        id="password3"
+        name="password3"
+        placeholder="Standard password field"
+        data-blur-reveal="false"
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="password4">Password (Disabled)</label>
+      <input type="password" id="password4" name="password4" placeholder="Disabled field" disabled>
+    </div>
+
+    <div class="form-group">
+      <label for="password5">Password (Readonly)</label>
+      <input type="password" id="password5" name="password5" value="readonly123" readonly>
+    </div>
+  </form>
+
+  <div class="info">
+    <strong>Test Instructions:</strong>
+    <ul>
+      <li><strong>Desktop:</strong> Hover over password fields to reveal characters</li>
+      <li><strong>Mobile:</strong> Touch and drag across password fields</li>
+      <li><strong>Keyboard:</strong> Focus field, use Arrow keys to move cursor, Shift+Arrow to reveal</li>
+    </ul>
+  </div>
+
+  <div id="event-log">
+    <div class="log-entry">Event log will appear here...</div>
+  </div>
+
+  <script type="module">
+    // Event logging for testing
+    const logEl = document.getElementById('event-log');
+
+    function log(message) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.textContent = `[${new Date().toISOString().slice(11, 23)}] ${message}`;
+      logEl.insertBefore(entry, logEl.firstChild);
+
+      // Keep only last 50 entries
+      while (logEl.children.length > 50) {
+        logEl.removeChild(logEl.lastChild);
+      }
+    }
+
+    // Store events for E2E test access
+    window.lastRevealEvent = null;
+    window.lastHideEvent = null;
+    window.lastInitEvent = null;
+
+    // Listen for blur reveal events
+    document.addEventListener('blurreveal:init', (e) => {
+      window.lastInitEvent = e;
+      log(`INIT: ${e.target.id}`);
+    });
+
+    document.addEventListener('blurreveal:reveal', (e) => {
+      window.lastRevealEvent = e;
+      log(`REVEAL: x=${e.detail.x.toFixed(0)}, y=${e.detail.y.toFixed(0)}, radius=${e.detail.radius}`);
+    });
+
+    document.addEventListener('blurreveal:hide', (e) => {
+      window.lastHideEvent = e;
+      log(`HIDE: ${e.target.id}`);
+    });
+
+    document.addEventListener('blurreveal:destroy', (e) => {
+      log(`DESTROY: ${e.target.id}`);
+    });
+
+    log('Test page loaded. Waiting for Blur Reveal Input initialization...');
+
+    // Import and initialize blur reveal
+    import { BlurRevealInput } from '/src/index.ts';
+
+    // Apply to all password inputs (except opt-out)
+    const inputs = document.querySelectorAll('input[type="password"]');
+    inputs.forEach(input => {
+      // Skip opt-out inputs
+      if (input.getAttribute('data-blur-reveal') === 'false') {
+        log(`SKIPPED: ${input.id} (opt-out)`);
+        return;
+      }
+
+      try {
+        const instance = new BlurRevealInput(input);
+        log(`CREATED: ${input.id}`);
+      } catch (err) {
+        log(`ERROR: ${input.id} - ${err.message}`);
+      }
+    });
+  </script>
+</body>
+</html>

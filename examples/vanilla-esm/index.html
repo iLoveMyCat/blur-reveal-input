@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blur Reveal Input - Vanilla ESM Example</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 500px;
+      margin: 4rem auto;
+      padding: 0 1rem;
+    }
+    h1 { font-size: 1.5rem; }
+    input[type="password"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 2px solid #e1e5eb;
+      border-radius: 8px;
+      margin-top: 0.5rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: #0066cc;
+    }
+    .info {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #f0f7ff;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: #555;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+    }
+    button:hover { background: #f5f5f5; }
+  </style>
+</head>
+<body>
+  <h1>Vanilla ESM Example</h1>
+  <p>Using ES module import — no bundler needed, just a modern browser.</p>
+
+  <label for="pw">Password</label>
+  <input type="password" id="pw" placeholder="Type something, then hover to reveal...">
+
+  <button id="toggle">Disable blur effect</button>
+
+  <div class="info">
+    <strong>How it works:</strong> Uses <code>&lt;script type="module"&gt;</code> to import
+    <code>BlurRevealInput</code> directly. Shows programmatic enable/disable control.
+  </div>
+
+  <script type="module">
+    import { BlurRevealInput } from '../../dist/blur-reveal-input.esm.js';
+
+    const input = document.getElementById('pw');
+    const toggle = document.getElementById('toggle');
+    const instance = new BlurRevealInput(input);
+
+    let enabled = true;
+    toggle.addEventListener('click', () => {
+      enabled = !enabled;
+      if (enabled) {
+        instance.enable();
+        toggle.textContent = 'Disable blur effect';
+      } else {
+        instance.disable();
+        toggle.textContent = 'Enable blur effect';
+      }
+    });
+  </script>
+</body>
+</html>

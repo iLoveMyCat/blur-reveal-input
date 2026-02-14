@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blur Reveal Input - Web Component Example</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 500px;
+      margin: 4rem auto;
+      padding: 0 1rem;
+    }
+    h1 { font-size: 1.5rem; }
+    .info {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #f0f7ff;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Web Component Example</h1>
+  <p>A custom <code>&lt;blur-reveal-password&gt;</code> element wrapping the library.</p>
+
+  <label for="pw">Password</label>
+  <blur-reveal-password
+    id="pw"
+    placeholder="Type something, then hover to reveal..."
+    blur-intensity="5"
+  ></blur-reveal-password>
+
+  <div class="info">
+    <strong>How it works:</strong> The custom element creates a password input internally
+    and applies <code>BlurRevealInput</code> to it. Configuration is done via attributes.
+    Works in any HTML page — no framework needed.
+  </div>
+
+  <script type="module" src="./src/blur-reveal-element.js"></script>
+</body>
+</html>
